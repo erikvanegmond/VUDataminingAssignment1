@@ -8,7 +8,7 @@ class DataAggregator:
     def read(self, filepath):
         """
         Generates the aggregated data. For each day there is the average mood (the value) and the features.
-        There are a few possiible variables. For each variable we take the sum and the average over each day. These
+        There are a few possible variables. For each variable we take the sum and the average over each day. These
         Will be the features.
         :param filepath:
         :return:
@@ -28,7 +28,6 @@ class DataAggregator:
         mask = (df['time'] > start_date) & (df['time'] <= end_date) & (df['id'] == 'AS14.01')
         # apply query
         tf = df.loc[mask]
-
         # group by day
         gs = tf.groupby(pd.TimeGrouper(key='time', freq='D'))
         for g in gs:
@@ -39,7 +38,19 @@ class DataAggregator:
                 daymean = varselection['value'].mean()
                 daysum = varselection['value'].sum()
                 dayvar = varselection['value'].var() #variance
-                print var, daymean, daysum, dayvar
+                #print var, daymean, daysum, dayvar
+            break
+                    
+                    
                 # print gdf.loc[(gdf['variable'] == var)]
                 # print g[1]['value'].mean()
-            break
+            
+        
+        # rolling window by 5 days
+        #fivedaymean = df.resample('D').mean().rolling(window=5).mean()
+        #fivedaysum = df.resample('D').sum().rolling(window=5).sum()
+        #fivedayvar = df.resample('D').var().rolling(window=5).var()
+        #print fivedaymean
+        
+        
+        
