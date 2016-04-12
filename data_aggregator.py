@@ -24,7 +24,7 @@ class DataAggregator:
         vars = df['variable'].unique()  # all possible variables
 
         current_date = pd.datetime(2014, 4, 3)  # is set on midnigth, the start of the day.
-        start_date = current_date - pd.DateOffset(days=10)
+        start_date = current_date - pd.DateOffset(days=5)
         end_date = current_date
         print current_date, start_date, end_date
         # a query on the date range, for a specific pariticipant.
@@ -56,13 +56,12 @@ class DataAggregator:
         
         #print time_range.index
         #return
-        a = np.unique(np.array(time_range.index.map(pd.Timestamp.date)))
+        a = np.unique(np.array(tf.index.map(pd.Timestamp.date)))
         for i in range(len(a)):
             if i > 5:
                 start = a[i - 5]
                 end = a[i]
-                five_days_range = time_range[start:end]
-                five_days_vars = five_days_range
+                five_days_vars = tf[start:end]
                 for var in vars:
                     #print var
                     varselection = five_days_vars.loc[(five_days_vars['variable'] == var)]
