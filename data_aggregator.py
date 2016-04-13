@@ -4,13 +4,18 @@ import numpy as np
 
 
 class DataAggregator:
-    def __init__(self, filepath, window_size=5):
+    def __init__(self, filepath, window_size=5, variables=None):
         self.window_size = window_size
         dateparse = lambda x: pd.datetime.strptime(x, '%Y-%m-%d %H:%M:%S.%f')
         self.df = pd.read_csv(filepath, parse_dates=['time'], index_col='time', date_parser=dateparse)
+        self.participants = self.df['id'].unique()  # all participants (don't know if needed)
+        if variables:
+            self.variables = variables
+        else:
+            self.variables = self.df['variable'].unique()  # all possible variables
         print "data opened"
 
-    def read(self):
+    def read(self, method='combined'):
         """
         Generates the aggregated data. For each day there is the average mood (the value) and the features.
         There are a few possible variables. For each variable we take the sum and the average over each day. These
@@ -20,22 +25,45 @@ class DataAggregator:
         """
 
 
-        participants = self.df['id'].unique()  # all participants (don't know if needed)
-        vars = self.df['variable'].unique()  # all possible variables
 
-        return self.window_combined_days(self.df, participants, vars, self.window_size)
+        if method == 'combined':
+            return self.window_combined_days(self.window_size)
+        elif method == 'separate':
+            return self.window_separate_days(self.window_size)
+        elif method == 'all':
+            return self.all_data()
 
-    def window_seperate_days(self, df, participants, vars, window_size):
+    def all_data(self):
+        moods = []
+        index_dates = []
+        for current_id in self.participants:
+            mask = (self.df['id'] == current_id)
+
+            # get every date for one person
+            tf = self.df.loc[mask]
+            tf = tf.ix[pd.to_datetime(tf.index).sort_values()]
+            dates = np.unique(np.array(tf.index.map(pd.Timestamp.date)))
+            for date in dates:
+                end = date
+                cur_day = tf[end:end + pd.DateOffset(days=1)]
+                mood_selection = cur_day.loc[(cur_day['variable'] == 'mood')]
+                if len(mood_selection) > 0:
+                    mood_mean = mood_selection['value'].mean()
+                moods.append(mood_mean)
+                index_dates.append(date)
+        return pd.DataFrame(moods, index=pd.DatetimeIndex(index_dates), columns=['Mood'])
+
+    def window_separate_days(self, window_size):
         current_date = pd.datetime(2014, 4, 3)  # is set on midnigth, the start of the day.
         start_date = current_date - pd.DateOffset(days=window_size)
         end_date = current_date
         print current_date, start_date, end_date
         # a query on the date range, for a specific pariticipant.
-        for current_id in participants:
-            mask = (df['id'] == current_id)
+        for current_id in self.participants:
+            mask = (self.df['id'] == current_id)
 
             # get every date for one person
-            tf = df.loc[mask]
+            tf = self.df.loc[mask]
             tf = tf.ix[pd.to_datetime(tf.index).sort_values()]
 
             # get the time range that we are interested in
@@ -47,7 +75,7 @@ class DataAggregator:
             for group in groups:
                 # g is a tuple, g[0] is the how the group is created, g[1] is the dataframe
                 gdf = group[1]
-                for var in vars:
+                for var in self.variables:
                     varselection = gdf.loc[(gdf['variable'] == var)]
                     daymean = varselection['value'].mean()
                     daysum = varselection['value'].sum()
@@ -55,14 +83,14 @@ class DataAggregator:
                     print var, daymean, daysum, dayvar
                 break
 
-    def window_combined_days(self, df, participants, vars, window_size):
+    def window_combined_days(self, window_size):
         data = []
         target = []
-        for current_id in participants:
-            mask = (df['id'] == current_id)
+        for current_id in self.participants:
+            mask = (self.df['id'] == current_id)
 
             # get every date for one person
-            tf = df.loc[mask]
+            tf = self.df.loc[mask]
             tf = tf.ix[pd.to_datetime(tf.index).sort_values()]
             a = np.unique(np.array(tf.index.map(pd.Timestamp.date)))
             for i in range(len(a)):
@@ -71,7 +99,7 @@ class DataAggregator:
                     start = a[i - window_size]
                     end = a[i]
                     five_days_vars = tf[start:end]
-                    for var in vars:
+                    for var in self.variables:
                         varselection = five_days_vars.loc[(five_days_vars['variable'] == var)]
                         five_day_mean = varselection['value'].mean()
                         five_day_mean = five_day_mean if not np.isnan(five_day_mean) else 0
@@ -94,5 +122,5 @@ class DataAggregator:
                         data.append(window_data)
                         target.append(mood_mean)
 
-                    # target.append()
+                        # target.append()
         return np.array(data), np.array(target)

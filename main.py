@@ -1,15 +1,20 @@
 import data_aggregator as dr
 from scipy.optimize import brute
 from statsmodels.tsa.arima_model import ARIMA
+import statsmodels.api as sm
+import pandas as pd
+
 import numpy as np
 from sklearn.tree import DecisionTreeClassifier
 from sklearn import cross_validation
 
-def test(window_size, data_aggregator):
+
+def testDecisionTree(window_size, data_aggregator):
     data, target = data_aggregator.read()
     print "\n\nTesting window size", window_size
     for _ in range(1):
-        data_train, data_test, target_train, target_test = cross_validation.train_test_split(data, target, test_size=0.3)
+        data_train, data_test, target_train, target_test = cross_validation.train_test_split(data, target,
+                                                                                             test_size=0.3)
 
         clf = DecisionTreeClassifier()
         clf = clf.fit(data_train, target_train)
@@ -31,13 +36,24 @@ def test(window_size, data_aggregator):
     print "score 8:", data_score
 
 
-filepath = 'data/dataset_mood_smartphone.csv'
-# filepath = 'data/dataset_small.csv'
+def testARIMA(data_aggregator):
+    data = data_aggregator.read(method='all')
+    print type(data), data, data.index
+    arma_mod20 = sm.tsa.ARMA(data, (2, 0)).fit()
+    print arma_mod20.params
+    predict_sunspots = arma_mod20.predict(pd.to_datetime('2014-4-22'), pd.to_datetime('2014-4-25'), dynamic=True)
+    print predict_sunspots
+
+
+# filepath = 'data/dataset_mood_smartphone.csv'
+filepath = 'data/dataset_small.csv'
 
 data_aggregator = dr.DataAggregator(filepath)
 
-for window_size in range(1, 6):
-    test(window_size, data_aggregator)
+testARIMA(data_aggregator)
+
+# for window_size in range(1, 6):
+#     testDecisionTree(window_size, data_aggregator)
 
 # Reading the data
 
