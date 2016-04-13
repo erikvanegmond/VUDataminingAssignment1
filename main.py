@@ -1,12 +1,13 @@
 import data_aggregator as dr
 from scipy.optimize import brute
-from statsmodels.tsa.arima_model import ARIMA
 import statsmodels.api as sm
 import pandas as pd
+import datetime
 
 import numpy as np
 from sklearn.tree import DecisionTreeClassifier
 from sklearn import cross_validation
+import  sklearn.metrics as metrics
 
 
 def testDecisionTree(window_size, data_aggregator):
@@ -38,11 +39,17 @@ def testDecisionTree(window_size, data_aggregator):
 
 def testARIMA(data_aggregator):
     data = data_aggregator.read(method='all')
-    print type(data), data, data.index
-    arma_mod20 = sm.tsa.ARMA(data, (2, 0)).fit()
-    print arma_mod20.params
-    predict_sunspots = arma_mod20.predict(pd.to_datetime('2014-4-22'), pd.to_datetime('2014-4-25'), dynamic=True)
-    print predict_sunspots
+    arma_mod20 = sm.tsa.ARMA(data, (2, 0), freq='D').fit()
+    print arma_mod20
+    start = '2014-03-30'
+    end = '2014-05-04'
+    predict_moods = arma_mod20.predict(start, end, dynamic=True)
+    real_moods = data[start:end]
+    print predict_moods.round(0)
+    print real_moods.round(0)
+    print metrics.mean_squared_error(real_moods, predict_moods)
+    print metrics.accuracy_score(real_moods.round(0), predict_moods.round(0))
+
 
 
 # filepath = 'data/dataset_mood_smartphone.csv'
@@ -68,13 +75,13 @@ http://chrisstrelioff.ws/sandbox/2015/06/08/decision_trees_in_python_with_scikit
 a nice read about scikit, decision trees and pandas
 """
 
+#
+# def objfunc(order, exog, endog):
+#     fit = ARIMA(endog, order, exog).fit()
+#     return fit.aic()
+#
+#     grid = (slice(1, 3, 1), slice(1, 3, 1), slice(1, 3, 1))
+#     brute(objfunc, grid, args=(exog, endog), finish=None)
 
-def objfunc(order, exog, endog):
-    fit = ARIMA(endog, order, exog).fit()
-    return fit.aic()
 
-    grid = (slice(1, 3, 1), slice(1, 3, 1), slice(1, 3, 1))
-    brute(objfunc, grid, args=(exog, endog), finish=None)
-
-
-    # Use ARIMAResults.predict to cross-validate alternative models. The best approach would be to keep the tail of the time series (say most recent 5% of data) out of sample, and use these points to obtain the test error of the fitted models.
+# Use ARIMAResults.predict to cross-validate alternative models. The best approach would be to keep the tail of the time series (say most recent 5% of data) out of sample, and use these points to obtain the test error of the fitted models.

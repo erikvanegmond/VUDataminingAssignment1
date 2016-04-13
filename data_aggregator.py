@@ -36,21 +36,21 @@ class DataAggregator:
     def all_data(self):
         moods = []
         index_dates = []
-        for current_id in self.participants:
-            mask = (self.df['id'] == current_id)
+        current_id = self.participants[0]
+        mask = (self.df['id'] == current_id)
 
-            # get every date for one person
-            tf = self.df.loc[mask]
-            tf = tf.ix[pd.to_datetime(tf.index).sort_values()]
-            dates = np.unique(np.array(tf.index.map(pd.Timestamp.date)))
-            for date in dates:
-                end = date
-                cur_day = tf[end:end + pd.DateOffset(days=1)]
-                mood_selection = cur_day.loc[(cur_day['variable'] == 'mood')]
-                if len(mood_selection) > 0:
-                    mood_mean = mood_selection['value'].mean()
-                moods.append(mood_mean)
-                index_dates.append(date)
+        # get every date for one person
+        tf = self.df.loc[mask]
+        tf = tf.ix[pd.to_datetime(tf.index).sort_values()]
+        dates = np.unique(np.array(tf.index.map(pd.Timestamp.date)))
+        for date in dates:
+            end = date
+            cur_day = tf[end:end + pd.DateOffset(days=1)]
+            mood_selection = cur_day.loc[(cur_day['variable'] == 'mood')]
+            if len(mood_selection) > 0:
+                mood_mean = mood_selection['value'].mean()
+            moods.append(mood_mean)
+            index_dates.append(date)
         return pd.DataFrame(moods, index=pd.DatetimeIndex(index_dates), columns=['Mood'])
 
     def window_separate_days(self, window_size):
