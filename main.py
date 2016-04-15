@@ -52,12 +52,12 @@ def testARIMA(data_aggregator):
 
 
 
-# filepath = 'data/dataset_mood_smartphone.csv'
-filepath = 'data/dataset_small.csv'
+filepath = 'data/dataset_mood_smartphone.csv'
+#filepath = 'data/dataset_small.csv'
 
 data_aggregator = dr.DataAggregator(filepath)
 
-testARIMA(data_aggregator)
+#testARIMA(data_aggregator)
 
 # for window_size in range(1, 6):
 #     testDecisionTree(window_size, data_aggregator)
