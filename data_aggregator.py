@@ -23,8 +23,7 @@ class DataAggregator:
         :param filepath:
         :return:
         """
-
-
+        
 
         if method == 'combined':
             return self.window_combined_days(self.window_size)
@@ -86,6 +85,7 @@ class DataAggregator:
     def window_combined_days(self, window_size):
         data = []
         target = []
+        datatime = []
         for current_id in self.participants:
             mask = (self.df['id'] == current_id)
 
@@ -107,20 +107,19 @@ class DataAggregator:
                         five_day_sum = five_day_sum if not np.isnan(five_day_sum) else 0
                         five_day_var = varselection['value'].var()
                         five_day_var = five_day_var if not np.isnan(five_day_var) else 0
-
                         if np.isnan(five_day_mean):
                             pass
                             print current_id, start, end, var, five_day_mean, five_day_sum, five_day_var
                         else:
                             # print current_id, start, end, var, five_day_mean, five_day_sum, five_day_var
                             window_data += [five_day_mean, five_day_sum, five_day_var]
-
                     cur_day = tf[end:end + pd.DateOffset(days=1)]
                     mood_selection = cur_day.loc[(cur_day['variable'] == 'mood')]
                     if len(mood_selection) > 0:
                         mood_mean = int(mood_selection['value'].mean())
                         data.append(window_data)
+                        datatime.append([a[i], current_id, window_data])
                         target.append(mood_mean)
 
                         # target.append()
-        return np.array(data), np.array(target)
+        return np.array(data), np.array(target), self.participants, self.variables, datatime
