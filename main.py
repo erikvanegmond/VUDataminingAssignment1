@@ -11,7 +11,7 @@ import  sklearn.metrics as metrics
 
 
 def testDecisionTree(window_size, data_aggregator):
-    data, target = data_aggregator.read()
+    data, target, participants, variables, datatime = data_aggregator.read()
     print "\n\nTesting window size", window_size
     for _ in range(1):
         data_train, data_test, target_train, target_test = cross_validation.train_test_split(data, target,
