@@ -31,6 +31,8 @@ class DataAggregator:
             return self.window_separate_days(self.window_size)
         elif method == 'all':
             return self.all_data()
+        elif method == 'all_nomean':
+            return self.all_nomean()
 
     def all_data(self):
         moods = []
@@ -52,6 +54,25 @@ class DataAggregator:
             index_dates.append(date)
         return pd.DataFrame(moods, index=pd.DatetimeIndex(index_dates), columns=['Mood'])
 
+    def all_nomean(self):
+        moods = []
+        index_dates = []
+        current_id = self.participants[0]
+        mask = (self.df['id'] == current_id)
+
+        # get every date for one person
+        tf = self.df.loc[mask]
+        tf = tf.ix[pd.to_datetime(tf.index).sort_values()]
+        dates = np.unique(np.array(tf.index.map(pd.Timestamp.date)))
+        for date in dates:
+            end = date
+            cur_day = tf[end:end + pd.DateOffset(days=1)]
+            mood_selection = cur_day.loc[(cur_day['variable'] == 'mood')]
+            for v in mood_selection['value']:
+                moods.append(float(v))
+                index_dates.append(date)
+        return pd.DataFrame(moods, index=pd.DatetimeIndex(index_dates), columns=['Mood'])
+
     def window_separate_days(self, window_size):
         #Shouldnt we set this date to the last day that this person filled in the form on his telephone?
         current_date = pd.datetime(2014, 4, 3)  # is set on midnigth, the start of the day.
@@ -60,10 +81,10 @@ class DataAggregator:
         end_date = current_date
         print current_date, start_date, end_date
         # a query on the date range, for a specific pariticipant.
-        
+
         data = []
         target = []
-        datatime = []        
+        datatime = []
         for current_id in self.participants:
             mask = (self.df['id'] == current_id)
 
@@ -96,7 +117,7 @@ class DataAggregator:
                     else:
                         # print current_id, start, end, var, five_day_mean, five_day_sum, five_day_var
                         window_data += [daymean]
-                        
+
                     end = a[count_days]
                 cur_day = tf[end:end + pd.DateOffset(days=1)]
                 print cur_day
