@@ -85,6 +85,7 @@ class DataAggregator:
     def window_combined_days(self, window_size):
         data = []
         target = []
+        datatime = []
         for current_id in self.participants:
             mask = (self.df['id'] == current_id)
 
@@ -117,7 +118,8 @@ class DataAggregator:
                     if len(mood_selection) > 0:
                         mood_mean = int(mood_selection['value'].mean())
                         data.append(window_data)
+                        datatime.append([a[i], current_id, window_data])
                         target.append(mood_mean)
 
                         # target.append()
-        return np.array(data), np.array(target), self.participants, self.variables, self.df
+        return np.array(data), np.array(target), self.participants, self.variables, datatime
