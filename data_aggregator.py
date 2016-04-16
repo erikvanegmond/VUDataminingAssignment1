@@ -15,7 +15,7 @@ class DataAggregator:
             self.variables = self.df['variable'].unique()  # all possible variables
         print "data opened"
 
-    def read(self, method='combined'):
+    def read(self, method='separate'):
         """
         Generates the aggregated data. For each day there is the average mood (the value) and the features.
         There are a few possible variables. For each variable we take the sum and the average over each day. These
@@ -60,6 +60,10 @@ class DataAggregator:
         end_date = current_date
         print current_date, start_date, end_date
         # a query on the date range, for a specific pariticipant.
+        
+        data = []
+        target = []
+        datatime = []        
         for current_id in self.participants:
             mask = (self.df['id'] == current_id)
 
@@ -72,17 +76,38 @@ class DataAggregator:
             # print time_range
 
             # group by day
+            a = np.unique(np.array(tf.index.map(pd.Timestamp.date)))
+            count_days = 0
             groups = time_range.groupby(pd.TimeGrouper(freq='D'))
             for group in groups:
+                window_data = []
+                count_days += 1
                 # g is a tuple, g[0] is the how the group is created, g[1] is the dataframe
                 gdf = group[1]
                 for var in self.variables:
                     varselection = gdf.loc[(gdf['variable'] == var)]
                     daymean = varselection['value'].mean()
-                    daysum = varselection['value'].sum()
-                    dayvar = varselection['value'].var()  # variance
-                    print var, daymean, daysum, dayvar
-                break
+                    print daymean
+                    #daysum = varselection['value'].sum()
+                    #dayvar = varselection['value'].var()  # variance
+                    #print var, daymean, daysum, dayvar
+                    if np.isnan(daymean):
+                        pass
+                    else:
+                        # print current_id, start, end, var, five_day_mean, five_day_sum, five_day_var
+                        window_data += [daymean]
+                        
+                    end = a[count_days]
+                cur_day = tf[end:end + pd.DateOffset(days=1)]
+                print cur_day
+                mood_selection = cur_day.loc[(cur_day['variable'] == 'mood')]
+                if len(mood_selection) > 0:
+                    mood_mean = int(mood_selection['value'].mean())
+                    print window_data
+                    data.append(window_data)
+                    datatime.append([a[count_days], current_id, window_data])
+                    target.append(mood_mean)
+        return np.array(data), np.array(target), self.participants, self.variables, datatime
 
     def window_combined_days(self, window_size):
         data = []
