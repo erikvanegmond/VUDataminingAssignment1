@@ -53,7 +53,9 @@ class DataAggregator:
         return pd.DataFrame(moods, index=pd.DatetimeIndex(index_dates), columns=['Mood'])
 
     def window_separate_days(self, window_size):
+        #Shouldnt we set this date to the last day that this person filled in the form on his telephone?
         current_date = pd.datetime(2014, 4, 3)  # is set on midnigth, the start of the day.
+        
         start_date = current_date - pd.DateOffset(days=window_size)
         end_date = current_date
         print current_date, start_date, end_date
