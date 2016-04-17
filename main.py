@@ -11,7 +11,7 @@ import  sklearn.metrics as metrics
 
 
 def testDecisionTree(window_size, data_aggregator):
-    data, target, participants, variables, datatime = data_aggregator.read()
+    data, target, participants, variables, datatime = data_aggregator.read(method='combined')
     print "\n\nTesting window size", window_size
     for _ in range(1):
         data_train, data_test, target_train, target_test = cross_validation.train_test_split(data, target,
@@ -38,7 +38,7 @@ def testDecisionTree(window_size, data_aggregator):
 
 
 def testARIMA(data_aggregator):
-    data = data_aggregator.read(method='all')
+    data = data_aggregator.read(method='combined')
     arma_mod20 = sm.tsa.ARMA(data, (2, 0), freq='D').fit()
     print arma_mod20
     start = '2014-03-30'
@@ -57,10 +57,9 @@ filepath = 'data/dataset_small.csv'
 
 data_aggregator = dr.DataAggregator(filepath)
 
-testARIMA(data_aggregator)
+# testARIMA(data_aggregator)
 
-# for window_size in range(1, 6):
-#     testDecisionTree(window_size, data_aggregator)
+testDecisionTree(5, data_aggregator)
 
 # Reading the data
 

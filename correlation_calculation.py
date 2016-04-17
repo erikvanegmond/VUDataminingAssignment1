@@ -13,8 +13,30 @@ import matplotlib.pyplot as plt
 filepath = 'data/dataset_mood_smartphone.csv'
 data_aggregator = dr.DataAggregator(filepath)
 
-df = data_aggregator.read(method='separate')
-print df
+data, target, participants, variables, datatime = data_aggregator.read(method='separate')
+print data
+
+new_features = []
+for features in data:
+    if 0 in features:
+        pass
+    else:
+        new_features.append(features)
+
+features = np.array(new_features)
+rows,cols = features.shape
+
+corr_and_pvalue = []
+name_array1 = []
+name_array2 = []
+k = 0
+for i in range(0,cols):
+    for j in range(k,cols):
+        corr_and_pvalue.append(stats.spearmanr(features[:,i],features[:,j]))
+        name_array1.append(variables[i])
+        name_array2.append(variables[j])
+    k = k+1
+            
 '''
 count = 0
 for var in variables:
