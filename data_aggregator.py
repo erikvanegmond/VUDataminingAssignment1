@@ -20,7 +20,7 @@ class DataAggregator:
         Generates the aggregated data. For each day there is the average mood (the value) and the features.
         There are a few possible variables. For each variable we take the sum and the average over each day. These
         Will be the features.
-        :param filepath:
+        :param method: Method of the aggregation. [combined, separate, all, all_nomean]
         :return:
         """
 
