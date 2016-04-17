@@ -9,6 +9,8 @@ import pandas as pd
 import scipy.stats as stats
 import matplotlib.pyplot as plt
 
+data_path_figs = 'C:/Users/Celeste/Documents/GitHub/VUDataminingAssignment1'
+
 # the dataframe
 filepath = 'data/dataset_mood_smartphone.csv'
 data_aggregator = dr.DataAggregator(filepath)
@@ -36,7 +38,37 @@ for i in range(0,cols):
         name_array1.append(variables[i])
         name_array2.append(variables[j])
     k = k+1
-            
+
+# extract only the correlation
+correlations = tuple(x[0] for x in corr_and_pvalue)
+      
+# combine correlations and name_array in one 2-dimensional matrix, in which you can see
+# which correlation belongs to which name    
+corr_names_pre = np.vstack((correlations, name_array1))
+corr_names2 = np.vstack((corr_names_pre, name_array2)).T
+corr_names2 = corr_names2[corr_names2[:,0].argsort(axis=0)]
+
+
+neg_array = []
+pos_array = []
+for i in range(0,len(corr_names2)):
+    if float(corr_names2[i,0]) < 0:
+        neg_array.append(corr_names2[i,:])
+    else:
+        pos_array.append(corr_names2[i,:])
+        
+neg_array_rev = neg_array[::-1]
+
+corr_names2 = np.vstack((neg_array_rev,pos_array))
+
+# plot the correlation against the number of the column of the feature    
+fig = plt.figure()
+errax = fig.add_subplot(1, 1, 1)
+errax.set_xlabel('features sorted from lowest correlation to highest correlation')
+errax.set_ylabel('correlation coefficient')
+errax.plot(corr_names2[:,0])
+fig.savefig(data_path_figs + '/correlation_sorted_fig.png')
+fig.show()      
 '''
 count = 0
 for var in variables:
