@@ -113,7 +113,7 @@ class DataAggregator:
                     #dayvar = varselection['value'].var()  # variance
                     #print var, daymean, daysum, dayvar
                     if np.isnan(daymean):
-                        pass
+                        window_data += [0]
                     else:
                         # print current_id, start, end, var, five_day_mean, five_day_sum, five_day_var
                         window_data += [daymean]

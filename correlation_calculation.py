@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 filepath = 'data/dataset_mood_smartphone.csv'
 data_aggregator = dr.DataAggregator(filepath)
 
-df = data_aggregator.read(method='all')
+df = data_aggregator.read(method='separate')
 print df
 '''
 count = 0
@@ -44,8 +44,8 @@ for i in range(0,cols):
         name_array2.append(feature_names[j])
     k = k+1
 '''
-correlation = df['variable'].corr(method = 'pearson')
-print correlation
+#correlation = df['variable'].corr(method = 'pearson')
+#print correlation
 
 '''
 # read all features
